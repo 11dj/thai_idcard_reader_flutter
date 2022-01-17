@@ -32,6 +32,25 @@ class IdCardReader {
     return res;
   }
 
+  static Future get open1 async {
+    final res = await _channel.invokeMethod('open1');
+    return res;
+  }
+
+  static Future get warm1 async {
+    final res = await _channel.invokeMethod('warm1');
+    return res;
+  }
+
+  static Future get protocal1 async {
+    final res = await _channel.invokeMethod('protocal1');
+    return res;
+  }
+
+  static Future get read1 async {
+    final res = await _channel.invokeMethod('read1');
+    return res;
+  }
 
   static Stream<List>? get getDevices {
     _deviceStream = _eventChannel.receiveBroadcastStream().cast();

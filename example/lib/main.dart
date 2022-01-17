@@ -22,6 +22,10 @@ class _MyAppState extends State<MyApp> {
   var _aa1;
   var _t1;
   var _t2;
+  var _open1;
+  var _warm1;
+  var _protocal1;
+  var _readCID;
 
   @override
   void initState() {
@@ -80,6 +84,57 @@ class _MyAppState extends State<MyApp> {
     }
   }
 
+  open1() async {
+    try {
+      var aa = await IdCardReader.open1;
+      setState(() {
+        _open1 = aa;
+      });
+    } catch (e) {
+      setState(() {
+        _open1 = 'ERR open1 $e';
+      });
+    }
+  }
+
+  warm1() async {
+    try {
+      var aa = await IdCardReader.warm1;
+      setState(() {
+        _warm1 = aa;
+      });
+    } catch (e) {
+      setState(() {
+        _warm1 = 'ERR warm1 $e';
+      });
+    }
+  }
+
+  protocal1() async {
+    try {
+      var aa = await IdCardReader.protocal1;
+      setState(() {
+        _protocal1 = aa;
+      });
+    } catch (e) {
+      setState(() {
+        _protocal1 = 'ERR protocal1 $e';
+      });
+    }
+  }
+
+  readCID() async {
+    try {
+      var aa = await IdCardReader.read1;
+      setState(() {
+        _readCID = aa;
+      });
+    } catch (e) {
+      setState(() {
+        _readCID = 'ERR readCID $e';
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -99,17 +154,29 @@ class _MyAppState extends State<MyApp> {
                 stream: IdCardReader.getRandomNumberStream,
                 builder: (BuildContext context, AsyncSnapshot<int> snapshot) {
                   if (snapshot.hasData) {
-                    return Text("[EventChannel] Current Random Number: ${snapshot.data}");
+                    return Text(
+                        "[EventChannel] Current Random Number: ${snapshot.data}");
                   } else {
-                    return const Text("[EventChannel] Waiting for new random number...");
+                    return const Text(
+                        "[EventChannel] Waiting for new random number...");
                   }
                 },
               ),
-
               ElevatedButton(onPressed: _fn1, child: const Text('Device list')),
               Text(_deviceList.toString()),
               ElevatedButton(onPressed: _fn2, child: const Text('fn2 test1')),
               Text(_t1.toString()),
+              ElevatedButton(onPressed: _fn2, child: const Text('fn2 test1')),
+              Text(_t1.toString()),
+              ElevatedButton(onPressed: open1, child: const Text('open1')),
+              Text(_open1.toString()),
+              ElevatedButton(onPressed: warm1, child: const Text('warm1')),
+              Text(_warm1.toString()),
+              ElevatedButton(
+                  onPressed: protocal1, child: const Text('protocal1')),
+              Text(_protocal1.toString()),
+              ElevatedButton(onPressed: readCID, child: const Text('readCID')),
+              Text(_readCID.toString()),
             ],
           ),
         ),
