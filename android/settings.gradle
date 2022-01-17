@@ -1,0 +1,3 @@
+include ':acs'
+
+rootProject.name = 'id_card_reader'
