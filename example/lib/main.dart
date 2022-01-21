@@ -1,8 +1,4 @@
 import 'package:flutter/material.dart';
-import 'dart:async';
-
-import 'package:flutter/services.dart';
-import 'package:id_card_reader/common.dart';
 import 'package:id_card_reader/id_card_reader.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'dart:typed_data';
@@ -32,65 +28,41 @@ class _MyAppState extends State<MyApp> {
   var _warm1;
   var _protocal1;
   var _data;
+  var _error;
+  var _device;
 
   @override
   void initState() {
     super.initState();
-    initPlatformState();
-    // Intl.defaultLocale = 'th';
-    // initializeDateFormatting();
+    IdCardReader.getReaderStream.listen(_onData);
+    IdCardReader.getUSBStream.listen(_onUSB);
   }
 
-  // Platform messages are asynchronous, so we initialize in an async method.
-  Future<void> initPlatformState() async {
-    String platformVersion;
-    // Platform messages may fail, so we use a try/catch PlatformException.
-    // We also handle the message potentially returning null.
+  void _onUSB(event) {
     try {
-      platformVersion =
-          await IdCardReader.platformVersion ?? 'Unknown platform version';
-    } on PlatformException {
-      platformVersion = 'Failed to get platform version.';
+      setState(() {
+        _device = event;
+      });
+    } catch (e) {
+      setState(() {
+        _error = e.toString();
+      });
     }
-
-    // If the widget was removed from the tree while the asynchronous platform
-    // message was in flight, we want to discard the reply rather than calling
-    // setState to update our non-existent appearance.
-    if (!mounted) return;
-
-    setState(() {
-      _platformVersion = platformVersion;
-    });
   }
 
-  // _fn1() async {
-  //   print('Hello111');
-  //   List<UsbDevice> aa;
-  //   try {
-  //     aa = await IdCardReader.getDeviceList();
-  //     print('aax $aa');
-  //     setState(() {
-  //       _deviceList = aa;
-  //     });
-  //   } catch (e) {
-  //     setState(() {
-  //       _deviceList = 'ERR fn1 $e';
-  //     });
-  //   }
-  // }
-
-  // _fn2() async {
-  //   try {
-  //     var aa = await IdCardReader.test1;
-  //     setState(() {
-  //       _t1 = aa;
-  //     });
-  //   } catch (e) {
-  //     setState(() {
-  //       _t1 = 'ERR fn2 $e';
-  //     });
-  //   }
-  // }
+  void _onData(event) {
+    try {
+      if (event['status'] == 'Present') {
+        readAll();
+      } else if (event['status'] == 'Absent') {
+        _clear();
+      }
+    } catch (e) {
+      setState(() {
+        _error = e.toString();
+      });
+    }
+  }
 
   open1() async {
     try {
@@ -101,34 +73,6 @@ class _MyAppState extends State<MyApp> {
     } catch (e) {
       setState(() {
         _open1 = 'ERR open1 $e';
-        _data = null;
-      });
-    }
-  }
-
-  warm1() async {
-    try {
-      var aa = await IdCardReader.warm1;
-      setState(() {
-        _warm1 = aa;
-      });
-    } catch (e) {
-      setState(() {
-        _warm1 = 'ERR warm1 $e';
-        _data = null;
-      });
-    }
-  }
-
-  protocal1() async {
-    try {
-      var aa = await IdCardReader.protocol1;
-      setState(() {
-        _protocal1 = aa;
-      });
-    } catch (e) {
-      setState(() {
-        _protocal1 = 'ERR protocal1 $e';
         _data = null;
       });
     }
@@ -157,30 +101,53 @@ class _MyAppState extends State<MyApp> {
     }
   }
 
+  _clear() {
+    setState(() {
+      _data = null;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(
-          title: const Text('ACS Thai ID Card Reader'),
+          title: const Text('Thai ID Card Reader'),
         ),
         body: SingleChildScrollView(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Row(
-                children: [
-                  ElevatedButton(onPressed: open1, child: const Text('open')),
-                  ElevatedButton(onPressed: warm1, child: const Text('warm')),
-                  ElevatedButton(
-                      onPressed: protocal1, child: const Text('protocal')),
-                  ElevatedButton(onPressed: readAll, child: const Text('read')),
-                ],
-              ),
-              Text(_open1.toString()),
-              Text(_warm1.toString()),
-              Text(_protocal1.toString()),
+              // StreamBuilder(
+              //   stream: IdCardReader.getUSBStream,
+              //   builder: (BuildContext context, AsyncSnapshot snapshot) {
+              //     if (snapshot.hasData) {
+              //       return UsbDeviceCard(
+              //         device: snapshot.data,
+              //       );
+              //     } else {
+              //       return const EmptyHeader(
+              //         text: 'เสียบเครื่องอ่านบัตรก่อน',
+              //       );
+              //     }
+              //   },
+              // ),
+              if (_device != null)
+                UsbDeviceCard(
+                  device: _device,
+                ),
+              if (_device == null || !_device.isAttached)
+                const EmptyHeader(
+                  text: 'เสียบเครื่องอ่านบัตรก่อน',
+                ),
+              if (_error != null) Text(_error.toString()),
+              if (_data == null && (_device != null && _device.hasPermission))
+                const EmptyHeader(
+                  icon: Icons.credit_card,
+                  text: 'เสียบบัตรประชาชนได้เลย',
+                ),
               if (_data != null) ...[
+                const Padding(padding: EdgeInsets.all(8.0)),
                 Center(
                   child: Image.memory(
                     Uint8List.fromList(_data.image),
@@ -214,17 +181,78 @@ class _MyAppState extends State<MyApp> {
                     value:
                         '${_data.expireDate.toString()}\n${formattedDate(_data.expireDate)}'),
               ],
-              StreamBuilder(
-                stream: IdCardReader.getStream1,
-                builder: (BuildContext context, AsyncSnapshot snapshot) {
-                  if (snapshot.hasData) {
-                    return Text("[EventChannel]: ${snapshot.data.toString()}");
-                  } else {
-                    return const Text("[EventChannel] Waiting....");
-                  }
-                },
-              ),
             ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class EmptyHeader extends StatelessWidget {
+  final IconData? icon;
+  final String? text;
+  const EmptyHeader({
+    this.icon,
+    this.text,
+    Key? key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+        child: SizedBox(
+            height: 300,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  icon ?? Icons.usb,
+                  size: 60,
+                ),
+                Center(
+                    child: Text(
+                  text ?? 'Empty',
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontSize: 32,
+                    fontWeight: FontWeight.bold,
+                  ),
+                )),
+              ],
+            )));
+  }
+}
+
+class UsbDeviceCard extends StatelessWidget {
+  final dynamic device;
+  const UsbDeviceCard({
+    Key? key,
+    this.device,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Opacity(
+      opacity: device.isAttached ? 1.0 : 0.5,
+      child: Card(
+        child: ListTile(
+          leading: const Icon(
+            Icons.usb,
+            size: 32,
+          ),
+          title: Text('${device.manufacturerName} ${device.productName}'),
+          subtitle: Text(device.identifier),
+          trailing: Container(
+            padding: const EdgeInsets.all(8),
+            color: device.hasPermission ? Colors.green : Colors.grey,
+            child: Text(
+                device.hasPermission
+                    ? 'Listening'
+                    : (device.isAttached ? 'Connected' : 'Disconnected'),
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                )),
           ),
         ),
       ),
