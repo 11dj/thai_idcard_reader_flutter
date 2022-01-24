@@ -70,35 +70,30 @@ class ThaiIdcardReaderFlutter {
       final rmSpaces = str.split('').where((ea) => ea != ' ').toList().join('');
       final rmHashtags =
           rmSpaces.split('#').where((ea) => ea != '').toList().join(' ');
-      return rmHashtags;
+      return rmHashtags.substring(0, rmHashtags.length - 2);
     }
 
-    bool isNumeric(String? s) {
-      if (s == null) {
-        return false;
+    formattedName(String? s, int i) {
+      if (i == 2) {
+        var sx = List.from(s!.split('#').where((ea) => ea != ''))[i]
+            .split(' ')
+            .where((ea) => ea != '')
+            .join('');
+        return sx.substring(0, sx.length - 2);
+      } else {
+        return List.from(s!.split('#').where((ea) => ea != ''))[i];
       }
-      return double.tryParse(s) != null;
     }
 
     final res = await _channel.invokeMethod('readAll');
     final resx = {
-      "nationID": res['cid'].split('').where((ea) => isNumeric(ea)).join(''),
-      "titleTH": List.from(res['nameTH'].split('#').where((ea) => ea != ''))[0],
-      "firstnameTH":
-          List.from(res['nameTH'].split('#').where((ea) => ea != ''))[1],
-      "lastnameTH":
-          List.from(res['nameTH'].split('#').where((ea) => ea != ''))[2]
-              .split(' ')
-              .where((ea) => ea != '')
-              .join(''),
-      "titleEN": List.from(res['nameEN'].split('#').where((ea) => ea != ''))[0],
-      "firstnameEN":
-          List.from(res['nameEN'].split('#').where((ea) => ea != ''))[1],
-      "lastnameEN":
-          List.from(res['nameEN'].split('#').where((ea) => ea != ''))[2]
-              .split(' ')
-              .where((ea) => ea != '')
-              .join(''),
+      "nationID": res['cid'].substring(0, 13),
+      "titleTH": formattedName(res['nameTH'], 0),
+      "firstnameTH": formattedName(res['nameTH'], 1),
+      "lastnameTH": formattedName(res['nameTH'], 2),
+      "titleEN": formattedName(res['nameEN'], 0),
+      "firstnameEN": formattedName(res['nameEN'], 1),
+      "lastnameEN": formattedName(res['nameEN'], 2),
       "gender": int.parse(res['gender'].split('')[0]),
       "birthdate": formattedDate(res['birthdate']),
       "address": removeWhitespaceAddr(res['address']),
