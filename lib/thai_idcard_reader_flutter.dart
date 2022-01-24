@@ -75,7 +75,7 @@ class ThaiIdcardReaderFlutter {
 
     final res = await _channel.invokeMethod('readAll');
     final resx = {
-      "nationID": res['cid'],
+      "nationID": res['cid'].split('').where((ea) => ea != '').join(''),
       "titleTH": List.from(res['nameTH'].split('#').where((ea) => ea != ''))[0],
       "firstnameTH":
           List.from(res['nameTH'].split('#').where((ea) => ea != ''))[1],
