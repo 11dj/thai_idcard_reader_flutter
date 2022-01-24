@@ -73,9 +73,16 @@ class ThaiIdcardReaderFlutter {
       return rmHashtags;
     }
 
+    bool isNumeric(String? s) {
+      if (s == null) {
+        return false;
+      }
+      return double.tryParse(s) != null;
+    }
+
     final res = await _channel.invokeMethod('readAll');
     final resx = {
-      "nationID": res['cid'].split('').where((ea) => ea != '').join(''),
+      "nationID": res['cid'].split('').where((ea) => isNumeric(ea)).join(''),
       "titleTH": List.from(res['nameTH'].split('#').where((ea) => ea != ''))[0],
       "firstnameTH":
           List.from(res['nameTH'].split('#').where((ea) => ea != ''))[1],
