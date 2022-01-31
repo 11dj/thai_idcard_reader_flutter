@@ -558,7 +558,7 @@ class ThaiADPU {
                                 buffer.write(respArray, 0, responsLength - 2)
                         }
                         val photoBuffer: ByteArray = buffer.toByteArray()
-                        response["pictureBuffer"] = photoBuffer
+                        response["photo"] = photoBuffer
                 }
                 return response
         }

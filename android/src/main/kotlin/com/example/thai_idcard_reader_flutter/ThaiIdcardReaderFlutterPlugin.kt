@@ -19,6 +19,7 @@ import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
 import java.nio.charset.*
 import java.util.*
+import org.json.JSONObject
 
 const val ACTION_USB_PERMISSION = "com.example.thai_idcard_reader_flutter.USB_PERMISSION"
 const val ACTION_USB_ATTACHED = "android.hardware.usb.action.USB_DEVICE_ATTACHED"
@@ -115,7 +116,8 @@ class ThaiIdcardReaderFlutterPlugin : FlutterPlugin, MethodCallHandler, EventCha
   override fun onAttachedToEngine(
       @NonNull flutterPluginBinding: FlutterPlugin.FlutterPluginBinding
   ) {
-    channel = MethodChannel(flutterPluginBinding.binaryMessenger, "thai_idcard_reader_flutter_channel")
+    channel =
+        MethodChannel(flutterPluginBinding.binaryMessenger, "thai_idcard_reader_flutter_channel")
     channel.setMethodCallHandler(this)
     applicationContext = flutterPluginBinding.applicationContext
     usbManager = applicationContext?.getSystemService(Context.USB_SERVICE) as UsbManager
@@ -163,48 +165,12 @@ class ThaiIdcardReaderFlutterPlugin : FlutterPlugin, MethodCallHandler, EventCha
       "getPlatformVersion" -> {
         result.success("Android ${Build.VERSION.RELEASE}")
       }
-      "openReader" -> {
-        val context =
-            applicationContext
-                ?: return result.error("IllegalState", "applicationContext null", null)
-        val manager = usbManager ?: return result.error("IllegalState", "usbManager null", null)
-        val reader = mReader ?: return result.error("IllegalState", "mReader null", null)
-        val dv = manager.deviceList
-        if (dv.isEmpty()) {
-          result.success("No Devices Currently Connected")
-        } else {
-          val usbDeviceList =
-              dv.entries.map {
-                mapOf(
-                    "identifier" to it.key,
-                    "vendorId" to it.value.vendorId,
-                    "productId" to it.value.productId,
-                    "configurationCount" to it.value.configurationCount
-                )
-              }
-          try {
-            var identifier = usbDeviceList[0].getValue("identifier")
-            val device = manager.deviceList[identifier]
-            if (!manager.hasPermission(device)) {
-              context.registerReceiver(receiver, IntentFilter(ACTION_USB_PERMISSION))
-              manager.requestPermission(device, pendingPermissionIntent(context))
-            } else {
-              reader.open(device)
-              if (reader.isSupported(device)) {
-                result.success("Worked :" + identifier)
-              }
-            }
-          } catch (e: Exception) {
-            result.success(e)
-          }
-        }
-      }
       "readAll" -> {
         var apdu = ThaiADPU()
         val reader = mReader ?: return result.error("IllegalState", "mReader null", null)
         try {
-          val res = apdu.readAll(reader)
-          result.success(res)
+          val res: Map<String, Any?> = apdu.readAll(reader)
+          result.success(JSONObject(res).toString())
         } catch (e: Exception) {
           result.success("ERR ${e.toString()}")
         }
@@ -215,8 +181,9 @@ class ThaiIdcardReaderFlutterPlugin : FlutterPlugin, MethodCallHandler, EventCha
         val selectedArray: Array<String> = selected!!.toTypedArray()
         val reader = mReader ?: return result.error("IllegalState", "mReader null", null)
         try {
-          val res = apdu.readSpecific(reader, selectedArray)
-          result.success(res)
+          val res: Map<String, Any?> = apdu.readSpecific(reader, selectedArray)
+
+          result.success(JSONObject(res).toString())
         } catch (e: Exception) {
           result.success("ERR ${e.toString()}")
         }

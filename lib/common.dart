@@ -93,8 +93,20 @@ class IDCardReader {
   String toString() => toMap().toString();
 }
 
+class ThaiIDType {
+  static String get cid => 'cid';
+  static String get nameTH => 'nameTH';
+  static String get nameEN => 'nameEN';
+  static String get address => 'address';
+  static String get birthdate => 'birthdate';
+  static String get issueDate => 'issueDate';
+  static String get expireDate => 'expireDate';
+  static String get gender => 'gender';
+  static String get photo => 'photo';
+}
+
 class ThaiIDCard {
-  String? nationID;
+  String? cid;
   String? titleTH;
   String? firstnameTH;
   String? lastnameTH;
@@ -106,9 +118,9 @@ class ThaiIDCard {
   String? issueDate;
   String? expireDate;
   int? gender;
-  List<int> image;
+  List<int> photo;
   ThaiIDCard({
-    this.nationID,
+    this.cid,
     this.titleTH,
     this.firstnameTH,
     this.lastnameTH,
@@ -120,12 +132,12 @@ class ThaiIDCard {
     this.issueDate,
     this.expireDate,
     this.gender,
-    this.image = const [],
+    this.photo = const [],
   });
 
   Map<String, dynamic> toMap() {
     return {
-      'nationID': nationID,
+      'nationID': cid,
       'titleTH': titleTH,
       'firstnameTH': firstnameTH,
       'lastnameTH': lastnameTH,
@@ -137,25 +149,66 @@ class ThaiIDCard {
       'issueDate': issueDate,
       'expireDate': expireDate,
       'gender': gender,
-      'image': image,
+      'photo': photo,
     };
   }
 
   factory ThaiIDCard.fromMap(Map<String, dynamic> map) {
+    String formattedDate(dt) {
+      String dtx = dt.toString();
+      try {
+        final yearTH = dtx.substring(0, 4);
+        final month = dtx.substring(4, 6);
+        final date = dtx.substring(6, 8);
+        final yearEN = int.parse(yearTH) - 543;
+        return '$yearEN-$month-$date';
+      } catch (e) {
+        return dt.toString() + e.toString();
+      }
+    }
+
+    String removeWhitespaceAddr(str) {
+      final rmSpaces = str.split('').where((ea) => ea != ' ').toList().join('');
+      final rmHashtags =
+          rmSpaces.split('#').where((ea) => ea != '').toList().join(' ');
+      return rmHashtags.substring(0, rmHashtags.length - 2);
+    }
+
+    String formattedName(String? s, int i) {
+      if (i == 2) {
+        var sx = List.from(s!.split('#').where((ea) => ea != ''))[i]
+            .split(' ')
+            .where((ea) => ea != '')
+            .join('');
+        return sx.substring(0, sx.length - 2);
+      } else {
+        return List.from(s!.split('#').where((ea) => ea != ''))[i];
+      }
+    }
+
     return ThaiIDCard(
-      nationID: map['nationID'] ?? '',
-      titleTH: map['titleTH'] ?? '',
-      firstnameTH: map['firstnameTH'] ?? '',
-      lastnameTH: map['lastnameTH'] ?? '',
-      titleEN: map['titleEN'] ?? '',
-      firstnameEN: map['firstnameEN'] ?? '',
-      lastnameEN: map['lastnameEN'] ?? '',
-      address: map['address'] ?? '',
-      birthdate: map['birthdate'],
-      issueDate: map['issueDate'],
-      expireDate: map['expireDate'],
-      gender: map['gender'],
-      image: map['image'] ?? [],
+      cid: map['cid']?.substring(0, 13),
+      titleTH: map['nameTH'] != null ? formattedName(map['nameTH'], 0) : null,
+      firstnameTH:
+          map['nameTH'] != null ? formattedName(map['nameTH'], 1) : null,
+      lastnameTH:
+          map['nameTH'] != null ? formattedName(map['nameTH'], 2) : null,
+      titleEN: map['nameEN'] != null ? formattedName(map['nameEN'], 0) : null,
+      firstnameEN:
+          map['nameEN'] != null ? formattedName(map['nameEN'], 1) : null,
+      lastnameEN:
+          map['nameEN'] != null ? formattedName(map['nameEN'], 2) : null,
+      address:
+          map['address'] != null ? removeWhitespaceAddr(map['address']) : null,
+      birthdate:
+          map['birthdate'] != null ? formattedDate(map['birthdate']) : null,
+      issueDate:
+          map['issueDate'] != null ? formattedDate(map['issueDate']) : null,
+      expireDate:
+          map['expireDate'] != null ? formattedDate(map['expireDate']) : null,
+      gender:
+          map['gender'] != null ? int.parse(map['gender'].split('')[0]) : null,
+      photo: map['photo'] != null ? map['photo'].cast<int>() : [],
     );
   }
 
