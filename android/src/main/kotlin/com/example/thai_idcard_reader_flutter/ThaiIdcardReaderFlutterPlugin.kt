@@ -27,7 +27,7 @@ const val ACTION_USB_DETACHED = "android.hardware.usb.action.USB_DEVICE_DETACHED
 const val ACTION_USB_GRANTED = "android.hardware.usb.action.EXTRA_PERMISSION_GRANTED"
 
 private fun pendingPermissionIntent(context: Context) =
-    PendingIntent.getBroadcast(context, 0, Intent(ACTION_USB_PERMISSION), 0)
+    PendingIntent.getBroadcast(context, 0, Intent(ACTION_USB_PERMISSION), PendingIntent.FLAG_MUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
 
 /** ThaiIdcardReaderFlutterPlugin */
 class ThaiIdcardReaderFlutterPlugin : FlutterPlugin, MethodCallHandler, EventChannel.StreamHandler {
@@ -172,7 +172,7 @@ class ThaiIdcardReaderFlutterPlugin : FlutterPlugin, MethodCallHandler, EventCha
           val res: Map<String, Any?> = apdu.readAll(reader)
           result.success(JSONObject(res).toString())
         } catch (e: Exception) {
-          result.success("ERR ${e.toString()}")
+          result.success("ERR/kt/readAll ${e.toString()}")
         }
       }
       "read" -> {
@@ -185,7 +185,7 @@ class ThaiIdcardReaderFlutterPlugin : FlutterPlugin, MethodCallHandler, EventCha
 
           result.success(JSONObject(res).toString())
         } catch (e: Exception) {
-          result.success("ERR ${e.toString()}")
+          result.success("ERR/kt/read ${e.toString()}")
         }
       }
       "requestPermission" -> {

@@ -1,3 +1,7 @@
+## 0.0.5
+* add credit.
+## 0.0.4
+* fixed some bug.
 ## 0.0.3
 * Improve Changelog.
 ## 0.0.2

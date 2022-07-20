@@ -2,6 +2,8 @@
 
 A plugin for communicating with ACS ACR39U Smart Card reader to read Thai ID card instantly.
 
+Credits. ADPU Command from [ThaiNationalIDCard](https://github.com/chakphanu/ThaiNationalIDCard) and android source code project from [android_thai_idcard_reader](https://github.com/anoochit/android_thai_idcard_reader)
+
 ## Support
 - Android 5.0 or newer
 - iOS is unavailable
@@ -106,3 +108,4 @@ await ThaiIdcardReaderFlutter.read(only: [
   ]);
 
 ```
+

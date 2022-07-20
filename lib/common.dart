@@ -1,8 +1,6 @@
 import 'dart:convert';
 import 'dart:core';
 
-import 'dart:typed_data';
-
 class UsbDevice {
   String? identifier;
   String? manufacturerName;
