@@ -1,3 +1,5 @@
+## 0.0.6
+* fix bug andd Support Android 12.
 ## 0.0.5
 * add credit.
 ## 0.0.4
