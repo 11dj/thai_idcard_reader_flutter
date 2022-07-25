@@ -27,7 +27,7 @@ const val ACTION_USB_DETACHED = "android.hardware.usb.action.USB_DEVICE_DETACHED
 const val ACTION_USB_GRANTED = "android.hardware.usb.action.EXTRA_PERMISSION_GRANTED"
 
 private fun pendingPermissionIntent(context: Context) =
-    PendingIntent.getBroadcast(context, 0, Intent(ACTION_USB_PERMISSION), PendingIntent.FLAG_MUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
+    PendingIntent.getBroadcast(context, 0, Intent(ACTION_USB_PERMISSION), PendingIntent.FLAG_UPDATE_CURRENT)
 
 /** ThaiIdcardReaderFlutterPlugin */
 class ThaiIdcardReaderFlutterPlugin : FlutterPlugin, MethodCallHandler, EventChannel.StreamHandler {
