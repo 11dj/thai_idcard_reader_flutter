@@ -1,3 +1,5 @@
+## 0.0.7
+* improve filepath.
 ## 0.0.6
 * fix bug andd Support Android 12.
 ## 0.0.5

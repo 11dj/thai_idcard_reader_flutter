@@ -1,6 +1,6 @@
 name: thai_idcard_reader_flutter
 description: A plugin for communicating with ACS ACR39U Smart Card reader to read Thai ID card instantly.
-version: 0.0.6
+version: 0.0.7
 homepage: https://github.com/11dj/thai_idcard_reader_flutter
 environment:
   sdk: ">=2.15.1 <3.0.0"
